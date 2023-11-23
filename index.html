@@ -25,116 +25,135 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        label {
-            margin-bottom: 5px;
-            font-weight: bold;
+        .chemical-inputs {
+            margin-bottom: 10px;
         }
-        input[type=number] {
-            width: calc(50% - 12px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
+        label {
+            display: block;
+            margin: 5px 0;
+        }
+        input[type=number], input[type=text] {
+            margin-right: 10px;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
             border-radius: 4px;
-            box-sizing: border-box;
-            display: inline-block;
         }
         button {
             background-color: #5cb85c;
             color: white;
-            padding: 10px 15px;
+            padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            margin: 5px 0px;
         }
         button:hover {
             background-color: #4cae4c;
         }
+        .results {
+            margin-top: 20px;
+        }
         .results p {
-            font-size: 16px;
-            color: #4a4a4a;
             background: #e2e2e2;
             padding: 10px;
             border-radius: 4px;
             margin-bottom: 10px;
         }
-        .add-button {
-            background-color: #f0ad4e;
-            margin-bottom: 20px;
+        .remove-button {
+            background-color: #d9534f;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            float: right;
         }
-        .add-button:hover {
-            background-color: #ec971f;
+        .remove-button:hover {
+            background-color: #c9302c;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
         }
     </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Chemical Mixture to Water Ratio Calculator</h2>
+        <div id="chemicalContainer" class="chemical-inputs">
+            <!-- Chemical inputs will be placed here by JavaScript -->
+        </div>
+        <button onclick="addChemicalInput()">Add Chemical</button>
+        <div>
+            <label for="drumSize">Drum Size (Liters):</label>
+            <input type="number" id="drumSize" placeholder="Enter drum size" min="0">
+        </div>
+        <div>
+            <label for="mixPart">Final Mixture Ratio (Chemical:Water):</label>
+            <input type="number" id="mixPart" placeholder="Chemical part" min="0">
+            <input type="number" id="waterMixPart" placeholder="Water part" min="0">
+        </div>
+        <button onclick="calculateChemicalVolumes()">Calculate</button>
+        <div id="results" class="results"></div>
+    </div>
+
     <script>
-        var chemicalCount = 1;
+        var chemicalCount = 0;
 
         function addChemicalInput() {
-            if (chemicalCount >= 6) {
+            chemicalCount++;
+            if (chemicalCount > 6) {
                 alert('You cannot add more than 6 chemicals.');
+                chemicalCount--;
                 return;
             }
-            chemicalCount++;
 
             var container = document.getElementById('chemicalContainer');
             var div = document.createElement('div');
-            div.className = 'chemical-inputs';
-            div.innerHTML = '<label>Chemical ' + chemicalCount + ':</label>' +
-                '<input type="number" id="chem' + chemicalCount + 'Part" placeholder="Chemical part" min="0" step="any">' +
-                '<input type="number" id="water' + chemicalCount + 'Part" placeholder="Water part" min="0" step="any">';
+            div.className = 'chemical-input clearfix';
+            div.id = 'chemical' + chemicalCount;
+            div.innerHTML = `
+                <label for="nameChem${chemicalCount}">Chemical ${chemicalCount} Name:</label>
+                <input type="text" id="nameChem${chemicalCount}" placeholder="Chemical name">
+                <label for="chem${chemicalCount}Part">Chemical to Water Ratio:</label>
+                <input type="number" id="chem${chemicalCount}Part" placeholder="Chemical part" min="0">
+                <input type="number" id="water${chemicalCount}Part" placeholder="Water part" min="0">
+                <button class="remove-button" onclick="removeChemicalInput(${chemicalCount})">Remove</button>
+            `;
             container.appendChild(div);
+        }
+
+        function removeChemicalInput(index) {
+            var elementToRemove = document.getElementById('chemical' + index);
+            elementToRemove.parentNode.removeChild(elementToRemove);
+            chemicalCount--;
         }
 
         function calculateChemicalVolumes() {
             var drumSize = parseFloat(document.getElementById('drumSize').value);
             var mixPart = parseFloat(document.getElementById('mixPart').value);
             var waterMixPart = parseFloat(document.getElementById('waterMixPart').value);
-
-            var totalMixRatio = mixPart / waterMixPart;
-            var totalProportion = 0;
-            var proportions = [];
+            var totalParts = mixPart + waterMixPart;
+            var resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
 
             for (var i = 1; i <= chemicalCount; i++) {
                 var chemPart = parseFloat(document.getElementById('chem' + i + 'Part').value);
                 var waterPart = parseFloat(document.getElementById('water' + i + 'Part').value);
-                var proportion = chemPart / (chemPart + waterPart);
-                proportions.push(proportion);
-                totalProportion += proportion;
-            }
+                var chemicalName = document.getElementById('nameChem' + i).value || 'Chemical ' + i;
+                var chemicalVolume = (drumSize * chemPart) / totalParts;
 
-            var resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = ''; // Clear previous results
-
-            for (var i = 0; i < proportions.length; i++) {
-                var volume = (drumSize * totalMixRatio * proportions[i]) / totalProportion;
                 var result = document.createElement('p');
-                result.textContent = 'Volume of Chemical ' + (i + 1) + ' needed: ' + volume.toFixed(2) + ' Liters';
+                result.textContent = `${chemicalName} needed: ${chemicalVolume.toFixed(2)} Liters`;
                 resultsDiv.appendChild(result);
             }
         }
+
+        // Initial call to add the first chemical input fields
+        addChemicalInput();
     </script>
-</head>
-<body>
-    <div class="container">
-        <h2>Chemical Mixture to Water Ratio Calculator</h2>
-        <div id="chemicalContainer" class="chemical-inputs">
-            <label>Chemical 1:</label>
-            <input type="number" id="chem1Part" placeholder="Chemical part" min="0" step="any">
-            <input type="number" id="water1Part" placeholder="Water part" min="0" step="any">
-        </div>
-        <button class="add-button" onclick="addChemicalInput()">Add Another Chemical</button>
-        <div>
-            <label>Drum Size (Liters):</label>
-            <input type="number" id="drumSize" placeholder="Total drum volume" min="0" step="any">
-        </div>
-        <div>
-            <label>Final Mixture Ratio (Chemical:Water):</label>
-            <input type="number" id="mixPart" placeholder="Mixture part" min="0" step="any">
-            <input type="number" id="waterMixPart" placeholder="Water part" min="0" step="any">
-        </div>
-        <button onclick="calculateChemicalVolumes()">Calculate</button>
-    </div>
-    <div id="results" class="results container"></div>
 </body>
 </html>
