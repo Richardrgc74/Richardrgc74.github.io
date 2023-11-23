@@ -140,14 +140,20 @@
             var resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';
 
+            var totalChemicalParts = 0;
             for (var i = 1; i <= chemicalCount; i++) {
                 var chemPart = parseFloat(document.getElementById('chem' + i + 'Part').value);
-                var waterPart = parseFloat(document.getElementById('water' + i + 'Part').value);
-                var chemicalName = document.getElementById('nameChem' + i).value || 'Chemical ' + i;
-                var chemicalVolume = (drumSize * chemPart) / totalParts;
+                totalChemicalParts += chemPart;
+            }
+
+            for (var i = 1; i <= chemicalCount; i++) {
+                var chemName = document.getElementById('nameChem' + i).value || 'Chemical ' + i;
+                var chemPart = parseFloat(document.getElementById('chem' + i + 'Part').value);
+                var chemRatioToTotal = chemPart / totalChemicalParts;
+                var chemicalVolume = drumSize * (chemRatioToTotal * mixPart) / totalParts;
 
                 var result = document.createElement('p');
-                result.textContent = `${chemicalName} needed: ${chemicalVolume.toFixed(2)} Liters`;
+                result.textContent = `${chemName} needed: ${chemicalVolume.toFixed(2)} Liters`;
                 resultsDiv.appendChild(result);
             }
         }
