@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemical Mixture to Water Ratio Calculator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #5a5a5a;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type=number] {
+            width: calc(50% - 12px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px 0px;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .results p {
+            font-size: 16px;
+            color: #4a4a4a;
+            background: #e2e2e2;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .add-button {
+            background-color: #f0ad4e;
+            margin-bottom: 20px;
+        }
+        .add-button:hover {
+            background-color: #ec971f;
+        }
+    </style>
+    <script>
+        var chemicalCount = 1;
+
+        function addChemicalInput() {
+            if (chemicalCount >= 6) {
+                alert('You cannot add more than 6 chemicals.');
+                return;
+            }
+            chemicalCount++;
+
+            var container = document.getElementById('chemicalContainer');
+            var div = document.createElement('div');
+            div.className = 'chemical-inputs';
+            div.innerHTML = '<label>Chemical ' + chemicalCount + ':</label>' +
+                '<input type="number" id="chem' + chemicalCount + 'Part" placeholder="Chemical part" min="0" step="any">' +
+                '<input type="number" id="water' + chemicalCount + 'Part" placeholder="Water part" min="0" step="any">';
+            container.appendChild(div);
+        }
+
+        function calculateChemicalVolumes() {
+            var drumSize = parseFloat(document.getElementById('drumSize').value);
+            var mixPart = parseFloat(document.getElementById('mixPart').value);
+            var waterMixPart = parseFloat(document.getElementById('waterMixPart').value);
+
+            var totalMixRatio = mixPart / waterMixPart;
+            var totalProportion = 0;
+            var proportions = [];
+
+            for (var i = 1; i <= chemicalCount; i++) {
+                var chemPart = parseFloat(document.getElementById('chem' + i + 'Part').value);
+                var waterPart = parseFloat(document.getElementById('water' + i + 'Part').value);
+                var proportion = chemPart / (chemPart + waterPart);
+                proportions.push(proportion);
+                totalProportion += proportion;
+            }
+
+            var resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = ''; // Clear previous results
+
+            for (var i = 0; i < proportions.length; i++) {
+                var volume = (drumSize * totalMixRatio * proportions[i]) / totalProportion;
+                var result = document.createElement('p');
+                result.textContent = 'Volume of Chemical ' + (i + 1) + ' needed: ' + volume.toFixed(2) + ' Liters';
+                resultsDiv.appendChild(result);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Chemical Mixture to Water Ratio Calculator</h2>
+        <div id="chemicalContainer" class="chemical-inputs">
+            <label>Chemical 1:</label>
+            <input type="number" id="chem1Part" placeholder="Chemical part" min="0" step="any">
+            <input type="number" id="water1Part" placeholder="Water part" min="0" step="any">
+        </div>
+        <button class="add-button" onclick="addChemicalInput()">Add Another Chemical</button>
+        <div>
+            <label>Drum Size (Liters):</label>
+            <input type="number" id="drumSize" placeholder="Total drum volume" min="0" step="any">
+        </div>
+        <div>
+            <label>Final Mixture Ratio (Chemical:Water):</label>
+            <input type="number" id="mixPart" placeholder="Mixture part" min="0" step="any">
+            <input type="number" id="waterMixPart" placeholder="Water part" min="0" step="any">
+        </div>
+        <button onclick="calculateChemicalVolumes()">Calculate</button>
+    </div>
+    <div id="results" class="results container"></div>
+</body>
+</html>
